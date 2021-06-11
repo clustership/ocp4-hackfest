@@ -1,0 +1,5 @@
+kata/all-registry-auth.json
+kata/pull-secret-all.json
+kata/qe-registry-auth.json
+kata/registry-auth.json
+*.sw?

@@ -1,0 +1,27 @@
+---
+# defaults file for ocp4-ai-prepare-libvirt
+
+vn_subnet: "192.168.50.0"
+vn_name: "openshift-4-cluster"
+vn_internal_domain: "compute.local"
+vn_public_domain: "h42.openshift.pub"
+
+listen_address: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
+
+openshift_version: "4.8.0-fc.8"
+master_count: 3
+master_vcpu: 4
+master_memory_size: 8192
+master_memory_unit: 'MiB'
+# qemu-img image size specified.
+#   You may use k, M, G, T, P or E suffixe
+master_root_disk_size: '120G'
+
+worker_count: 2
+worker_root_disk_size: '120G'
+worker_memory_size: 24576
+worker_memory_unit: 'MiB'
+
+worker_vm_create_data_disk: false
+
+vm_autostart: true

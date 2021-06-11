@@ -1,0 +1,2 @@
+[masters]
+192.168.70.1[0:2] ansible_user=core

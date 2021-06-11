@@ -1,0 +1,14 @@
+---
+discovery_iso: /var/lib/tftpboot/_iso/ai_rhcos.iso
+cluster_name: ai-bm-demo
+public_domain: clustership.com
+dns_provider: dnsimple
+
+master_vcpu: 8
+master_memory_size: 24576
+
+worker_vcpu: 16
+worker_memory_size: 65536
+worker_count: 2
+
+vn_subnet: "192.168.70.0"

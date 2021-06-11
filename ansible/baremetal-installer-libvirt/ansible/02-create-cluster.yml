@@ -1,0 +1,20 @@
+#!/usr/bin/env ansible-playbook 
+---
+# If you like to play: ./ansible/create.yml --skip-tags public_dns,letsencrypt
+- hosts: localhost
+  connection: local
+  # gather_facts true because we need the public ip address
+  gather_facts: true
+  become: true
+  vars_files:
+  - ../cluster.yml
+
+  tasks:
+  - name: "Debug {{ master_vcpu }}"
+    debug:
+      var: master_vcpu
+
+  - name: Create AI VMs
+    import_role: 
+      name: ocp4-ai-prepare-libvirt
+      tasks_from: create.yml

@@ -1,0 +1,90 @@
+---
+- import_tasks: create-network.yml
+  vars:
+    vn_public_domain: "{{ cluster_name }}.{{ public_domain }}"
+    vn_master_count: "{{ master_count }}"
+    vn_worker_count: "{{ worker_count }}"
+    vm_network: "{{ cluster_name }}"
+    vm_network_internal: "{{ cluster_name }}-internal"
+  tags: network
+
+- name: Set base mac address
+  ansible.builtin.set_fact:
+    base_mac_addr: "01-52-54-00-{{ '%02x' % vn_subnet.split('.')[1]|int }}-{{ '%02x' % vn_subnet.split('.')[2]|int }}"
+
+- name: Create pxeboot configuration
+  ansible.builtin.template:
+    src: pxelinux.cfg.j2
+    dest: "/var/lib/tftpboot/pxelinux.cfg/{{ base_mac_addr }}-{{ '%02x' % 2 }}"
+    owner: root
+    group: root
+    mode: '0644'
+  vars:
+    node_type: bootstrap
+
+- name: Create pxeboot configuration for masters
+  ansible.builtin.template:
+    src: pxelinux.cfg.j2
+    dest: "/var/lib/tftpboot/pxelinux.cfg/{{ base_mac_addr }}-{{ '%02x' % (10 + item) }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ range(0, master_count | int)|list }}"
+  vars:
+    node_type: master
+
+- name: Create pxeboot configuration for workers
+  ansible.builtin.template:
+    src: pxelinux.cfg.j2
+    dest: "/var/lib/tftpboot/pxelinux.cfg/{{ base_mac_addr }}-{{ '%02x' % (10 + master_count|int + item) }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ range(0, worker_count | int)|list }}"
+  vars:
+    node_type: worker
+
+- name: Create bootstrap node
+  include: create-vm.yml
+  vars:
+    vm_instance_name: "{{ cluster_name }}-bootstrap"
+    vm_network: "{{ cluster_name }}"
+    vm_network_internal: "{{ cluster_name }}-internal"
+    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % 2 }}"
+    vm_vcpu: "{{ master_vcpu }}"
+    vm_special_cpu: "{{ master_special_cpu | default('') }}"
+    vm_memory_size: "{{ master_memory_size }}"
+    vm_memory_unit: "{{ master_memory_unit }}"
+    vm_root_disk_size: "{{ master_root_disk_size }}"
+    vm_create_data_disk: false
+
+- name: Create master nodes
+  include: create-vm.yml
+  vars:
+    vm_instance_name: "{{ cluster_name }}-master-{{ item }}"
+    vm_network: "{{ cluster_name }}"
+    vm_network_internal: "{{ cluster_name }}-internal"
+    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + item|int) }}"
+    vm_vcpu: "{{ master_vcpu }}"
+    vm_special_cpu: "{{ master_special_cpu | default('') }}"
+    vm_memory_size: "{{ master_memory_size }}"
+    vm_memory_unit: "{{ master_memory_unit }}"
+    vm_root_disk_size: "{{ master_root_disk_size }}"
+    vm_create_data_disk: false
+  with_sequence: start=0 end="{{ master_count|int - 1 }}" stride=1
+
+- name: Create worker nodes
+  include: create-vm.yml
+  vars:
+    vm_instance_name: "{{ cluster_name }}-worker-{{ item }}"
+    vm_network: "{{ cluster_name }}"
+    vm_network_internal: "{{ cluster_name }}-internal"
+    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + master_count|int + item|int) }}"
+    vm_vcpu: "{{ worker_vcpu }}"
+    vm_special_cpu: "{{ worker_special_cpu | default('') }}"
+    vm_memory_size: "{{ worker_memory_size }}"
+    vm_memory_unit: "{{ worker_memory_unit }}"
+    vm_root_disk_size: "{{ worker_root_disk_size }}"
+    vm_data_disk_size: "128G"
+    vm_create_data_disk: "{{ worker_vm_create_data_disk }}"
+  with_sequence: start=0 end="{{ worker_count|int - 1 }}" stride=1

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: kata-deploy
+  name: kata-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kata-deploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: kata-deploy
+    spec:
+      runtimeClassName: kata
+      containers:
+      - image: quay.io/xymox/ubi8-debug-toolkit:0.2
+        name: ubi8-debug-toolkit
+        resources: {}
+status: {}

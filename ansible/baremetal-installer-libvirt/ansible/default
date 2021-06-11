@@ -1,0 +1,29 @@
+UI vesamenu.c32
+MENU BACKGROUND        bg-ocp.png   (1)
+MENU COLOR sel         4  #ffffff std   (2)
+MENU COLOR title       1  #ffffff    (3)
+TIMEOUT 300
+PROMPT 0
+MENU TITLE OPENSHIFT 4.x INSTALL BARE METAL PXE MENU  (4)
+
+LABEL INSTALL BOOTSTRAP    (5)
+ KERNEL coreos/rhcos-4.8.0-fc.7-x86_64-live-kernel-x86_64 console=tty0 console=ttyS0
+ APPEND initrd=coreos/rhcos-4.8.0-fc.7-x86_64-live-initramfs.x86_64.img coreos.live.rootfs_url=http://192.168.70.1:9000/coreos/rhcos-4.8.0-fc.7-x86_64-live-rootfs.x86_64.img coreos.inst.install_dev=/dev/vda coreos.inst.ignition_url=http://192.168.70.1:9000/coreos/bootstrap.ign
+
+LABEL INSTALL MASTER       (5) 
+ KERNEL coreos/rhcos-4.8.0-fc.7-x86_64-live-kernel-x86_64 console=tty0 console=ttyS0
+ APPEND initrd=coreos/rhcos-4.8.0-fc.7-x86_64-live-initramfs.x86_64.img coreos.live.rootfs_url=http://192.168.70.1:9000/coreos/rhcos-4.8.0-fc.7-x86_64-live-rootfs.x86_64.img coreos.inst.install_dev=/dev/vda coreos.inst.ignition_url=http://192.168.70.1:9000/coreos/master.ign
+
+LABEL INSTALL WORKER       (5) 
+ KERNEL coreos/rhcos-4.8.0-fc.7-x86_64-live-kernel-x86_64 console=tty0 console=ttyS0
+ APPEND initrd=coreos/rhcos-4.8.0-fc.7-x86_64-live-initramfs.x86_64.img coreos.live.rootfs_url=http://192.168.70.1:9000/coreos/rhcos-4.8.0-fc.7-x86_64-live-rootfs.x86_64.img coreos.inst.install_dev=/dev/vda coreos.inst.ignition_url=http://192.168.70.1:9000/coreos/worker.ign
+
+LABEL debian
+ MENU LABEL ^rhcos assisted installer (Netboot)
+ LINUX memdisk
+ INITRD _iso/ai_rhcos.iso
+
+label Boot local disk
+    kernel chain.c32 
+    append hd0
+

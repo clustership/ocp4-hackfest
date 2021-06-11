@@ -1,0 +1,19 @@
+#!/usr/bin/env ansible-playbook -i ./inventory
+---
+# If you like to play: ./ansible/create.yml --skip-tags public_dns,letsencrypt
+- hosts: masters
+  # gather_facts true because we need the public ip address
+  gather_facts: true
+  become: true
+  vars_files:
+  - ../cluster.yml
+  vars:
+    data_disk: /dev/vdb
+
+  tasks:
+  - name: "Parted {{ data_disk }}"
+    parted:
+      device: "{{ data_disk }}"
+      number: 1
+      part_type: extended
+      state: present
