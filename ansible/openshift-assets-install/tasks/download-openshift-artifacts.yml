@@ -52,11 +52,11 @@
 
 - name: Download fresh coreos image if previous doesn't exist
   block:
-    - name: Create coreos dest dir
-      ansible.builtin.file:
-        path: "{{ coreos_path }}"
-        state: directory
-        mode: '0755'
+  - name: Create coreos dest dir
+    ansible.builtin.file:
+      path: "{{ coreos_path }}"
+      state: directory
+      mode: '0755'
 
 #    # Work-a-round for https://github.com/ansible/ansible/issues/71420
 #    #   fix not shipped yet
@@ -65,14 +65,14 @@
 #        coreos_csum_str: "{{ lookup('url', coreos_csum_url,  split_lines=False ).split('\n') |map('regex_search','.*' + coreos_download_url | basename + '$') | select('string') | first | regex_search('^([a-z0-9])+')}}"
 #      when: coreos_csum_str is not defined
 #
-    - name: download coreos
-      get_url:
-        url: "{{ coreos_download_url }}/{{ item }}"
-        dest: "{{ coreos_path }}/{{ item }}"
-      loop:
-      - "rhcos-{{ coreos_version }}-{{ coreos_arch }}-live-kernel-{{ coreos_arch }}"
-      - "rhcos-{{ coreos_version }}-{{ coreos_arch }}-live-initramfs.{{ coreos_arch }}.img"
-      - "rhcos-{{ coreos_version }}-{{ coreos_arch }}-live-rootfs.{{ coreos_arch }}.img"
+  - name: download coreos
+    get_url:
+      url: "{{ coreos_download_url }}/{{ item }}"
+      dest: "{{ coreos_path }}/{{ item }}"
+    loop:
+    - "rhcos-{{ coreos_version }}-{{ coreos_arch }}-live-kernel-{{ coreos_arch }}"
+    - "rhcos-{{ coreos_version }}-{{ coreos_arch }}-live-initramfs.{{ coreos_arch }}.img"
+    - "rhcos-{{ coreos_version }}-{{ coreos_arch }}-live-rootfs.{{ coreos_arch }}.img"
 
 #      register: coreos_download
 #
@@ -112,6 +112,7 @@
 #    (not coreos_old_image.stat.exists) or
 #    csum_check.changed or
 #    csum_check.failed
+  when: False
 
 - name: Create OpenShift artifacts directory
   file:
