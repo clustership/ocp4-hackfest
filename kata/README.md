@@ -102,3 +102,9 @@ oc --dry-run=client create deployment kata-deploy --image=quay.io/xymox/ubi8-deb
   | yq e '.spec.replicas = 3' - \
   | oc apply -f -
 ```
+
+
+# Things that does not work
+
+## Share volumes between initContainer and container
+
